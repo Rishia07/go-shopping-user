@@ -66,8 +66,7 @@ export default function ViewProductScreen({ route, navigation }) {
 
     Alert.alert(
       "Add to cart",
-      `Are you sure you want to add this ${quantity}x ${
-        data.title
+      `Are you sure you want to add this ${quantity}x ${data.title
       } to your cart with a total price ₱ ${(data.price * quantity).toFixed(
         2
       )}?`,
@@ -87,6 +86,7 @@ export default function ViewProductScreen({ route, navigation }) {
                   price: (data.price * quantity).toFixed(2),
                   product: id,
                   user: userId,
+                  proofOfDelivery: ""
                 },
                 {
                   headers: {
@@ -115,22 +115,15 @@ export default function ViewProductScreen({ route, navigation }) {
 
     const totalPrice = (data.price * quantity).toFixed(2);
 
-    if (parseFloat(totalPrice) < 100) {
-      return Alert.alert(
-        "Minimum Order Requirement",
-        "The total price must be at least ₱100 to proceed with the purchase."
-      );
-    }
-    
+
+
     const token = await SecureStore.getItemAsync("token");
     const userId = await SecureStore.getItemAsync("userId");
 
-   
+
     Alert.alert(
       "Confirm Purchase",
-      `Are you sure you want to buy this ${quantity}x ${
-        data.title
-      } with a total price ₱ ${(data.price * quantity).toFixed(2)}?`,
+      `Are you sure you want to buy this ${quantity}x ${data.title} with a total price of ₱${(data.price * quantity + 65).toFixed(2)} (including ₱65 delivery fee)?`,
       [
         {
           text: "Cancel",
@@ -143,7 +136,7 @@ export default function ViewProductScreen({ route, navigation }) {
               await axios.put(
                 `https://go-shopping-api-mauve.vercel.app/api/products/${id}`,
                 {
-                  quantity: data.quantity - quantity,
+                  quantity: data.quantity - quantity
                 },
                 {
                   headers: {
@@ -151,14 +144,15 @@ export default function ViewProductScreen({ route, navigation }) {
                   },
                 }
               );
-
+              console.log("create")
               await createOrder({
                 quantity: quantity,
                 price: totalPrice,
                 product: id,
                 user: userId,
+                proofOfDelivery: "s"
               });
-
+              console.log("done")
               setQuantity(1);
 
               alert("You have successfully ordered this product!");
@@ -246,10 +240,21 @@ export default function ViewProductScreen({ route, navigation }) {
                   />
                 </View>
                 <View style={styles.priceContainer}>
-                  <Text style={styles.totalPriceLabel}>Total Price:</Text>
-                  <Text style={styles.totalPrice}>
-                    ₱ {(data.price * quantity).toFixed(2)}
-                  </Text>
+                  {/* Subtotal */}
+                  <View style={styles.row}>
+                    <Text style={styles.priceLabel}>Subtotal:</Text>
+                    <Text style={styles.priceValue}>
+                      ₱ {(data.price * quantity).toFixed(2)}
+                    </Text>
+                  </View>
+
+                  {/* Total Price */}
+                  <View style={styles.row}>
+                    <Text style={styles.totalPriceLabel}>Total Price:</Text>
+                    <Text style={styles.totalPrice}>
+                      ₱ {(data.price * quantity + 65).toFixed(2)}
+                    </Text>
+                  </View>
                 </View>
               </View>
               <View style={styles.buttonContainer}>
@@ -411,6 +416,23 @@ const styles = StyleSheet.create({
   totalPrice: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  priceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  row: {
+    marginHorizontal: 5,
+  },
+  label: {
+    fontSize: 16,
+    color: "#555",
+  },
+  value: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
   },
   addToCartButton: {
     width: "48%",

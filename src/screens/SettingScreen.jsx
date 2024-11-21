@@ -180,6 +180,10 @@ export default function SettingScreen() {
         </TouchableOpacity>
         <Text style={styles.name}>{userData.firstName} {userData.lastName}</Text>
         <Text style={styles.email}>{userData.email}</Text>
+        <Text style={styles.email}>+63{userData.phoneNumber.startsWith('0')
+          ? userData.phoneNumber.slice(1)
+          : userData.phoneNumber}</Text>
+
       </View>
       <AccountSettings AccountSettingsList={AccountSettingsList} navigation={navigation} />
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
